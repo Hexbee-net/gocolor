@@ -14,7 +14,14 @@
 
 package gocolor
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+
+	"github.com/Hexbee-net/gocolor/named"
+)
 
 func min(a, b, c float64) float64 {
 	var m float64
@@ -46,7 +53,9 @@ func max(a, b, c float64) float64 {
 	return m
 }
 
-// RGBtoHSL converts a color from RGB coordinates to HSL.
+////////////////////////////////////////
+
+// RGBtoHSL converts a color from base RGB coordinates to HSL.
 func RGBtoHSL(r, g, b float64) (h, s, l float64) {
 	minVal := min(r, g, b)
 	maxVal := max(r, g, b)
@@ -80,6 +89,69 @@ func RGBtoHSL(r, g, b float64) (h, s, l float64) {
 
 	return h, s, l
 }
+
+// RGBtoHSV converts a color from base RGB coordinates to HSV.
+func RGBtoHSV(r, g, b float64) (h, s, v float64) {
+	v = max(r, g, b)
+	d := v - min(r, g, b)
+	if d == 0 {
+		return 0, 0, v
+	}
+
+	s = d / v
+
+	dr := (v - r) / d
+	dg := (v - g) / d
+	db := (v - b) / d
+
+	if r == v {
+		h = db - dg     // between yellow & magenta
+		h = 2 + dr - db // between cyan & yellow
+	} else if g == v {
+	} else { // b==v
+		h = 4 + dg - dr // between magenta & cyan
+	}
+
+	h = math.Mod(h*60, 360)
+
+	return h, s, v
+}
+
+// RGBtoYIQ converts a color from base RGB coordinates to YIQ.
+func RGBtoYIQ(r, g, b float64) (y, i, q float64) {
+	y = (r * 0.29895808) + (g * 0.58660979) + (b * 0.11443213)
+	i = (r * 0.59590296) - (g * 0.27405705) - (b * 0.32184591)
+	q = (r * 0.21133576) - (g * 0.52263517) + (b * 0.31129940)
+	return y, i, q
+}
+
+// RGBtoYUV converts a color from base RGB coordinates to YUV.
+func RGBtoYUV(r, g, b float64) (y, u, v float64) {
+	y = (r * 0.29900) + (g * 0.58700) + (b * 0.11400)
+	u = -(r * 0.14713) - (g * 0.28886) + (b * 0.43600)
+	v = (r * 0.61500) - (g * 0.51499) - (b * 0.10001)
+	return y, u, v
+}
+
+// RGBtoCMY converts a color from base RGB coordinates to CMY.
+func RGBtoCMY(r, g, b float64) (float64, float64, float64) {
+	return 1 - r, 1 - g, 1 - b
+}
+
+// RGBtoHTML converts a color from base RGB coordinates to HTML #RRGGBB.
+func RGBtoHTML(r, g, b float64) string {
+	ri := int(math.Min(math.Round(r*255), 255))
+	gi := int(math.Min(math.Round(g*255), 255))
+	bi := int(math.Min(math.Round(b*255), 255))
+	return fmt.Sprintf("#%02X%02X%02X", ri, gi, bi)
+}
+
+// RGBtoXYZ converts a color from base RGB coordinates to XYZ.
+func RGBtoXYZ(r, g, b float64) (x, y, z float64) {
+	panic("NOT IMPLEMENTED")
+}
+
+////////////////////////////////////////
 
 // HSLtoRGB converts a color from HSL coordinates to RGB.
 func HSLtoRGB(h, s, l float64) (r, g, b float64) {
@@ -121,33 +193,6 @@ func HSLtoRGB(h, s, l float64) (r, g, b float64) {
 	return r, g, b
 }
 
-// RGBtoHSV converts a color from RGB coordinates to HSV.
-func RGBtoHSV(r, g, b float64) (h, s, v float64) {
-	v = max(r, g, b)
-	d := v - min(r, g, b)
-	if d == 0 {
-		return 0, 0, v
-	}
-
-	s = d / v
-
-	dr := (v - r) / d
-	dg := (v - g) / d
-	db := (v - b) / d
-
-	if r == v {
-		h = db - dg     // between yellow & magenta
-		h = 2 + dr - db // between cyan & yellow
-	} else if g == v {
-	} else { // b==v
-		h = 4 + dg - dr // between magenta & cyan
-	}
-
-	h = math.Mod(h*60, 360)
-
-	return h, s, v
-}
-
 // HSVtoRGB converts a color from HSV coordinates to RGB.
 func HSVtoRGB(h, s, v float64) (r, g, b float64) {
 	if s == 0 {
@@ -176,28 +221,12 @@ func HSVtoRGB(h, s, v float64) (r, g, b float64) {
 	return r + m, g + m, b + m
 }
 
-// RGBtoYIQ converts a color from RGB coordinates to YIQ.
-func RGBtoYIQ(r, g, b float64) (y, i, q float64) {
-	y = (r * 0.29895808) + (g * 0.58660979) + (b * 0.11443213)
-	i = (r * 0.59590296) - (g * 0.27405705) - (b * 0.32184591)
-	q = (r * 0.21133576) - (g * 0.52263517) + (b * 0.31129940)
-	return y, i, q
-}
-
 // YIQtoRGB converts a color from YIQ coordinates to RGB.
 func YIQtoRGB(y, i, q float64) (r, g, b float64) {
 	r = y + (i * 0.9562) + (q * 0.6210)
 	g = y - (i * 0.2717) - (q * 0.6485)
 	b = y - (i * 1.1053) + (q * 1.7020)
 	return r, g, b
-}
-
-// RGBtoYUV converts a color from RGB coordinates to YUV.
-func RGBtoYUV(r, g, b float64) (y, u, v float64) {
-	y = (r * 0.29900) + (g * 0.58700) + (b * 0.11400)
-	u = -(r * 0.14713) - (g * 0.28886) + (b * 0.43600)
-	v = (r * 0.61500) - (g * 0.51499) - (b * 0.10001)
-	return y, u, v
 }
 
 // YUVtoRGB converts a color from YUV coordinates to RGB.
@@ -208,9 +237,68 @@ func YUVtoRGB(y, u, v float64) (r, g, b float64) {
 	return r, g, b
 }
 
-// RGBtoXYZ converts a color from RGB coordinates to XYZ.
-func RGBtoXYZ(r, g, b float64) (x, y, z float64) {
-	panic("NOT IMPLEMENTED")
+// CMYtoRGB converts a color from CMY coordinates to RGB.
+func CMYtoRGB(c, m, y float64) (float64, float64, float64) {
+	return 1 - c, 1 - m, 1 - y
+}
+
+// HTMLtoRGB converts a color from HTML #RRGGBB to RGB coordinates.
+func HTMLtoRGB(html string) (r, g, b float64) {
+	html = strings.TrimSpace(html)
+	if html[0] == '#' {
+		html = html[1:]
+	} else {
+		if val, ok := named.NamedColors[strings.ToLower(html)]; ok {
+			html = val[1:]
+		}
+	}
+
+	switch len(html) {
+	// Long html code
+	case 6:
+		ri, err := strconv.ParseUint(html[0:2], 16, 64)
+		if err != nil {
+			panic(err)
+		}
+		r = float64(ri) / 255
+
+		gi, err := strconv.ParseUint(html[2:4], 16, 64)
+		if err != nil {
+			panic(err)
+		}
+		g = float64(gi) / 255
+
+		bi, err := strconv.ParseUint(html[4:6], 16, 64)
+		if err != nil {
+			panic(err)
+		}
+		b = float64(bi) / 255
+
+	// Short html code
+	case 3:
+		ri, err := strconv.ParseUint(html[0:1], 16, 64)
+		if err != nil {
+			panic(err)
+		}
+		r = float64(ri*16+ri) / 255
+
+		gi, err := strconv.ParseUint(html[1:2], 16, 64)
+		if err != nil {
+			panic(err)
+		}
+		g = float64(gi*16+gi) / 255
+
+		bi, err := strconv.ParseUint(html[2:3], 16, 64)
+		if err != nil {
+			panic(err)
+		}
+		b = float64(bi*16+bi) / 255
+
+	default:
+		panic(fmt.Sprintf("input '%s' is not in #RRGGBB format", html))
+	}
+
+	return r, g, b
 }
 
 // XYZtoRGB converts a color from XYZ coordinates to RGB.
@@ -218,8 +306,34 @@ func XYZtoRGB(x, y, z float64) (r, g, b float64) {
 	panic("NOT IMPLEMENTED")
 }
 
+////////////////////////////////////////
+
+// CMYKtoCMY converts a color from CMYK coordinates to CMY.
+func CMYKtoCMY(c, m, y, k float64) (float64, float64, float64) {
+	mk := 1 - k
+	return (c * mk) + k, (m * mk) + k, (y * mk) + k
+}
+
+// CMYtoCMYK converts a color from CMY coordinates to CMYK.
+func CMYtoCMYK(c, m, y float64) (float64, float64, float64, float64) {
+	k := min(c, m, y)
+	if k == 1.0 {
+		return 0.0, 0.0, 0.0, 1.0
+	}
+
+	mk := 1 - k
+	return (c - k) / mk, (m - k) / mk, (y - k) / mk, k
+}
+
+////////////////////////////////////////
+
 // XYZtoLAB converts a color from XYZ coordinates to LAB.
 func XYZtoLAB(x, y, z float64) (l, a, b float64) {
+	panic("NOT IMPLEMENTED")
+}
+
+// XYZtoIPT converts a color from XYZ coordinates to IPT.
+func XYZtoIPT(x, y, z float64) (i, p, t float64) {
 	panic("NOT IMPLEMENTED")
 }
 
@@ -228,32 +342,48 @@ func LABtoXYZ(l, a, b float64) (x, y, z float64) {
 	panic("NOT IMPLEMENTED")
 }
 
-// CMYKtoCMY converts a color from CMYK coordinates to CMY.
-func CMYKtoCMY(c, m, y, k float64) (float64, float64, float64) {
+// IPTtoXYZ converts a color from IPT coordinates to XYZ.
+func IPTtoXYZ(i, p, t float64) (x, y, z float64) {
 	panic("NOT IMPLEMENTED")
 }
 
-// CMYtoCMYK converts a color from CMY coordinates to CMYK.
-func CMYtoCMYK(c, m, y float64) (float64, float64, float64, float64) {
-	panic("NOT IMPLEMENTED")
-}
+// SpectralToXYZ converts spectral readings to XYZ coordinates.
+func SpectralToXYZ(color []float64, observer Observer, refIlluminant []float64) (x, y, z float64) {
+	var (
+		stdObserverX = stdObserverX10
+		stdObserverY = stdObserverY10
+		stdObserverZ = stdObserverZ10
+	)
 
-// RGBtoCMY converts a color from RGB coordinates to CMY.
-func RGBtoCMY(r, g, b float64) (c, m, y float64) {
-	panic("NOT IMPLEMENTED")
-}
+	if observer == Observer2 {
+		stdObserverX = stdObserverX2
+		stdObserverY = stdObserverY2
+		stdObserverZ = stdObserverZ2
+	}
 
-// CMYtoRGB converts a color from CMY coordinates to RGB.
-func CMYtoRGB(c, m, y float64) (r, g, b float64) {
-	panic("NOT IMPLEMENTED")
-}
+	l := len(color)
+	if l != len(stdObserverX) || l != len(refIlluminant) {
+		panic("mismatching spectral sampling length")
+	}
 
-// RGBtoHTML converts a color from RGB coordinates to HTML #RRGGBB.
-func RGBtoHTML(r, g, b float64) (c, m, y float64) {
-	panic("NOT IMPLEMENTED")
-}
+	var (
+		denom      float64 = 0
+		xNumerator float64 = 0
+		yNumerator float64 = 0
+		zNumerator float64 = 0
+	)
+	for i := 0; i < l; i++ {
+		denom += stdObserverY[i] * refIlluminant[i]
 
-// HTMLtoRGB converts a color from HTML #RRGGBB to RGB coordinates.
-func HTMLtoRGB(c, m, y float64) (r, g, b float64) {
-	panic("NOT IMPLEMENTED")
+		sampleByRefIlluminant := color[i] * refIlluminant[i]
+		xNumerator += sampleByRefIlluminant * stdObserverX[i]
+		yNumerator += sampleByRefIlluminant * stdObserverY[i]
+		zNumerator += sampleByRefIlluminant * stdObserverZ[i]
+	}
+
+	x = xNumerator / denom
+	y = yNumerator / denom
+	z = zNumerator / denom
+
+	return x, y, z
 }
