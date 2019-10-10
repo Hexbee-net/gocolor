@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Hexbee-net/gocolor/colorspace"
 	"github.com/Hexbee-net/gocolor/named"
 )
 
@@ -146,9 +147,59 @@ func RGBtoHTML(r, g, b float64) string {
 	return fmt.Sprintf("#%02X%02X%02X", ri, gi, bi)
 }
 
-// RGBtoXYZ converts a color from base RGB coordinates to XYZ.
-func RGBtoXYZ(r, g, b float64) (x, y, z float64) {
-	panic("NOT IMPLEMENTED")
+// RGBtoXYZ converts a color from RGB coordinates to XYZ.
+func RGBtoXYZ(r, g, b float64, space string) (x, y, z float64) {
+	switch space {
+	case colorspace.SRGB:
+		linearize := func(v float64) float64 {
+			if v <= 0.04045 {
+				return v / 12.92
+			}
+			return math.Pow((v+0.055)/1.055, 2.4)
+		}
+		r = linearize(r)
+		g = linearize(g)
+		b = linearize(b)
+
+	case colorspace.BT2020:
+		linearize := func(v float64) float64 {
+			if v <= 0.08124794403514049 {
+				return v / 4.5
+			}
+			return math.Pow((v+0.099)/1.099, 1/0.45)
+		}
+		r = linearize(r)
+		g = linearize(g)
+		b = linearize(b)
+
+	case colorspace.BT202012b:
+		linearize := func(v float64) float64 {
+			if v <= 0.081697877417347 {
+				return v / 4.5
+			}
+			return math.Pow((v+0.0993)/1.0993, 1/0.45)
+		}
+		r = linearize(r)
+		g = linearize(g)
+		b = linearize(b)
+
+	default:
+		gamma, ok := colorspace.Gamma[space]
+		if !ok {
+			panic(fmt.Sprintf("unrecognized RGB color space: %v", space))
+		}
+		r = math.Pow(r, gamma)
+		g = math.Pow(g, gamma)
+		b = math.Pow(b, gamma)
+	}
+
+	m, ok := conversionRgbXyz[space]
+	if !ok {
+		panic(fmt.Sprintf("unrecognized RGB color space: %v", space))
+	}
+
+	v := m.vdot(vector{r, g, b})
+	return math.Max(v.v0, 0), math.Max(v.v1, 0), math.Max(v.v2, 0)
 }
 
 ////////////////////////////////////////
@@ -302,8 +353,60 @@ func HTMLtoRGB(html string) (r, g, b float64) {
 }
 
 // XYZtoRGB converts a color from XYZ coordinates to RGB.
-func XYZtoRGB(x, y, z float64) (r, g, b float64) {
-	panic("NOT IMPLEMENTED")
+func XYZtoRGB(x, y, z float64, space string) (r, g, b float64) {
+	m, ok := conversionXyzRgb[space]
+	if !ok {
+		panic(fmt.Sprintf("unrecognized RGB color space: %v", space))
+	}
+
+	v := m.vdot(vector{x, y, z})
+	r, g, b = v.v0, v.v1, v.v2
+
+	switch space {
+	case colorspace.SRGB:
+		delinearize := func(v float64) float64 {
+			if v <= 0.0031308 {
+				return v * 12.92
+			}
+			return 1.055*math.Pow(v, 1/2.4) - 0.055
+		}
+		r = delinearize(r)
+		g = delinearize(g)
+		b = delinearize(b)
+
+	case colorspace.BT2020:
+		delinearize := func(v float64) float64 {
+			if v < 0.018 {
+				return v * 4.5
+			}
+			return 1.099*math.Pow(v, 0.45) - 0.099
+		}
+		r = delinearize(r)
+		g = delinearize(g)
+		b = delinearize(b)
+
+	case colorspace.BT202012b:
+		delinearize := func(v float64) float64 {
+			if v < 0.0181 {
+				return v * 4.5
+			}
+			return 1.0993*math.Pow(v, 0.45) - 0.0993
+		}
+		r = delinearize(r)
+		g = delinearize(g)
+		b = delinearize(b)
+
+	default:
+		gamma, ok := colorspace.Gamma[space]
+		if !ok {
+			panic(fmt.Sprintf("unrecognized RGB color space: %v", space))
+		}
+		r = math.Pow(r, 1/gamma)
+		g = math.Pow(g, 1/gamma)
+		b = math.Pow(b, 1/gamma)
+	}
+
+	return r, g, b
 }
 
 ////////////////////////////////////////
@@ -332,15 +435,59 @@ func XYZtoLAB(x, y, z float64) (l, a, b float64) {
 	panic("NOT IMPLEMENTED")
 }
 
+// XYZtoXYY converts a color from XYZ coordinates to xyY.
+func XYZtoXYY() {
+	panic("NOT IMPLEMENTED")
+}
+
+// XYZtoLUV converts a color from XYZ coordinates to Luv.
+func XYZtoLUV() {
+	panic("NOT IMPLEMENTED")
+}
+
+// XYYtoXYZ converts a color from xyZ coordinates to XYZ.
+func XYYtoXYZ() {
+	panic("NOT IMPLEMENTED")
+}
+
+// LUVtoXYZ converts a color from Luv coordinates to XYZ.
+func LUVtoXYZ() {
+	panic("NOT IMPLEMENTED")
+}
+
 // XYZtoIPT converts a color from XYZ coordinates to IPT.
 func XYZtoIPT(x, y, z float64) (i, p, t float64) {
 	panic("NOT IMPLEMENTED")
 }
 
+////////////////////////////////////////
+
 // LABtoXYZ converts a color from LAB coordinates to XYZ.
 func LABtoXYZ(l, a, b float64) (x, y, z float64) {
 	panic("NOT IMPLEMENTED")
 }
+
+// LABtoLCHAB converts a color from LAB coordinates to LCHab.
+func LABtoLCHAB() {
+	panic("NOT IMPLEMENTED")
+}
+
+// LCHABtoLAB converts a color from LCHab coordinates to LAB.
+func LCHABtoLAB() {
+	panic("NOT IMPLEMENTED")
+}
+
+// LUVtoLCHUV converts a color from Luv coordinates to LCHuv.
+func LUVtoLCHUV() {
+	panic("NOT IMPLEMENTED")
+}
+
+// LCHUVtoLUV converts a color from LCHuv coordinates to Luv.
+func LCHUVtoLUV() {
+	panic("NOT IMPLEMENTED")
+}
+
+////////////////////////////////////////
 
 // IPTtoXYZ converts a color from IPT coordinates to XYZ.
 func IPTtoXYZ(i, p, t float64) (x, y, z float64) {
@@ -350,15 +497,15 @@ func IPTtoXYZ(i, p, t float64) (x, y, z float64) {
 // SpectralToXYZ converts spectral readings to XYZ coordinates.
 func SpectralToXYZ(color []float64, observer Observer, refIlluminant []float64) (x, y, z float64) {
 	var (
-		stdObserverX = stdObserverX10
-		stdObserverY = stdObserverY10
-		stdObserverZ = stdObserverZ10
+		stdObserverX = stdObs10X
+		stdObserverY = stdObs10Y
+		stdObserverZ = stdObs10Z
 	)
 
 	if observer == Observer2 {
-		stdObserverX = stdObserverX2
-		stdObserverY = stdObserverY2
-		stdObserverZ = stdObserverZ2
+		stdObserverX = stdObs2X
+		stdObserverY = stdObs2Y
+		stdObserverZ = stdObs2Z
 	}
 
 	l := len(color)

@@ -17,20 +17,36 @@ package gocolor
 // Observer is used to define a standard observer angle of vision.
 type Observer int
 
-// Define the known standard observers.
+// Reference illuminants
+const (
+	RefIlluminantA         = "a"
+	RefIlluminantB         = "b"
+	RefIlluminantC         = "c"
+	RefIlluminantD50       = "d50"
+	RefIlluminantD55       = "d55"
+	RefIlluminantD65       = "d65"
+	RefIlluminantD75       = "d75"
+	RefIlluminantE         = "e"
+	RefIlluminantF2        = "f2"
+	RefIlluminantF7        = "f7"
+	RefIlluminantF11       = "f11"
+	RefIlluminantBlackBody = "blackbody"
+)
+
+// Standard observers
 const (
 	Observer2  = 2
 	Observer10 = 10
 )
 
-// Illuminant stores information on the color illuminant and observer angle.
-//
-// Illuminants and observer angles are used in all color spaces that use
-// reflective (instead of transmissive) light.
-type Illuminant struct {
-	Observer   Observer
-	Illuminant string
-}
+// // Illuminant stores information on the color illuminant and observer angle.
+// //
+// // Illuminants and observer angles are used in all color spaces that use
+// // reflective (instead of transmissive) light.
+// type Illuminant struct {
+// 	Observer   Observer
+// 	Illuminant string
+// }
 
 // Wavelength is used to index the differrent wavelengths in a spectral color.
 type Wavelength int
