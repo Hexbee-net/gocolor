@@ -20,39 +20,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Hexbee-net/gocolor/colorspace"
 	"github.com/Hexbee-net/gocolor/named"
 )
-
-func min(a, b, c float64) float64 {
-	var m float64
-	if a < b {
-		m = a
-	} else {
-		m = b
-	}
-
-	if c < m {
-		m = c
-	}
-
-	return m
-}
-
-func max(a, b, c float64) float64 {
-	var m float64
-	if a > b {
-		m = a
-	} else {
-		m = b
-	}
-
-	if c > m {
-		m = c
-	}
-
-	return m
-}
 
 ////////////////////////////////////////
 
@@ -150,7 +119,7 @@ func RGBtoHTML(r, g, b float64) string {
 // RGBtoXYZ converts a color from RGB coordinates to XYZ.
 func RGBtoXYZ(r, g, b float64, space string) (x, y, z float64) {
 	switch space {
-	case colorspace.SRGB:
+	case SRGB:
 		linearize := func(v float64) float64 {
 			if v <= 0.04045 {
 				return v / 12.92
@@ -161,7 +130,7 @@ func RGBtoXYZ(r, g, b float64, space string) (x, y, z float64) {
 		g = linearize(g)
 		b = linearize(b)
 
-	case colorspace.BT2020:
+	case BT2020:
 		linearize := func(v float64) float64 {
 			if v <= 0.08124794403514049 {
 				return v / 4.5
@@ -172,7 +141,7 @@ func RGBtoXYZ(r, g, b float64, space string) (x, y, z float64) {
 		g = linearize(g)
 		b = linearize(b)
 
-	case colorspace.BT202012b:
+	case BT202012b:
 		linearize := func(v float64) float64 {
 			if v <= 0.081697877417347 {
 				return v / 4.5
@@ -184,7 +153,7 @@ func RGBtoXYZ(r, g, b float64, space string) (x, y, z float64) {
 		b = linearize(b)
 
 	default:
-		gamma, ok := colorspace.Gamma[space]
+		gamma, ok := RGBGamma[space]
 		if !ok {
 			panic(fmt.Sprintf("unrecognized RGB color space: %v", space))
 		}
@@ -363,7 +332,7 @@ func XYZtoRGB(x, y, z float64, space string) (r, g, b float64) {
 	r, g, b = v.v0, v.v1, v.v2
 
 	switch space {
-	case colorspace.SRGB:
+	case SRGB:
 		delinearize := func(v float64) float64 {
 			if v <= 0.0031308 {
 				return v * 12.92
@@ -374,7 +343,7 @@ func XYZtoRGB(x, y, z float64, space string) (r, g, b float64) {
 		g = delinearize(g)
 		b = delinearize(b)
 
-	case colorspace.BT2020:
+	case BT2020:
 		delinearize := func(v float64) float64 {
 			if v < 0.018 {
 				return v * 4.5
@@ -385,7 +354,7 @@ func XYZtoRGB(x, y, z float64, space string) (r, g, b float64) {
 		g = delinearize(g)
 		b = delinearize(b)
 
-	case colorspace.BT202012b:
+	case BT202012b:
 		delinearize := func(v float64) float64 {
 			if v < 0.0181 {
 				return v * 4.5
@@ -397,7 +366,7 @@ func XYZtoRGB(x, y, z float64, space string) (r, g, b float64) {
 		b = delinearize(b)
 
 	default:
-		gamma, ok := colorspace.Gamma[space]
+		gamma, ok := RGBGamma[space]
 		if !ok {
 			panic(fmt.Sprintf("unrecognized RGB color space: %v", space))
 		}
@@ -430,9 +399,44 @@ func CMYtoCMYK(c, m, y float64) (float64, float64, float64, float64) {
 
 ////////////////////////////////////////
 
-// XYZtoLAB converts a color from XYZ coordinates to LAB.
-func XYZtoLAB(x, y, z float64) (l, a, b float64) {
-	panic("NOT IMPLEMENTED")
+// XYZtoLAB converts a color from XYZ coordinates to Lab.
+func XYZtoLAB(x, y, z float64, observer int, illuminant string) (l, a, b float64) {
+	obsWp, ok := observerWhitePoints[observer]
+	if !ok {
+		panic(fmt.Sprintf("unrecognized observer angle: %v", observer))
+	}
+	wp, ok := obsWp[illuminant]
+	if !ok {
+		panic(fmt.Sprintf("unrecognized illuminant: %v", illuminant))
+	}
+
+	x /= wp.v0
+	y /= wp.v1
+	z /= wp.v2
+
+	if x > CieE {
+		x = math.Pow(x, 1/3)
+	} else {
+		x = (7.787 * x) + (16.0 / 116.0)
+	}
+
+	if y > CieE {
+		y = math.Pow(y, 1/3)
+	} else {
+		y = (7.787 * y) + (16.0 / 116.0)
+	}
+
+	if z > CieE {
+		z = math.Pow(z, 1/3)
+	} else {
+		z = (7.787 * z) + (16.0 / 116.0)
+	}
+
+	l = (116.0 * y) - 16.0
+	a = 500.0 * (x - y)
+	b = 200.0 * (y - z)
+
+	return l, a, b
 }
 
 // XYZtoXYY converts a color from XYZ coordinates to xyY.
@@ -495,14 +499,14 @@ func IPTtoXYZ(i, p, t float64) (x, y, z float64) {
 }
 
 // SpectralToXYZ converts spectral readings to XYZ coordinates.
-func SpectralToXYZ(color []float64, observer Observer, refIlluminant []float64) (x, y, z float64) {
+func SpectralToXYZ(color []float64, observer int, refIlluminant []float64) (x, y, z float64) {
 	var (
 		stdObserverX = stdObs10X
 		stdObserverY = stdObs10Y
 		stdObserverZ = stdObs10Z
 	)
 
-	if observer == Observer2 {
+	if observer == int2 {
 		stdObserverX = stdObs2X
 		stdObserverY = stdObs2Y
 		stdObserverZ = stdObs2Z

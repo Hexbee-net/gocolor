@@ -64,10 +64,33 @@ func (a matrix) mdot(b matrix) matrix {
 	}
 }
 
-func (a matrix) vdiv(b vector) matrix {
-	return matrix{
-		rgbTgt.v0 / rgbSrc.v0, 0, 0,
-		0, rgbTgt.v1 / rgbSrc.v1, 0,
-		0, 0, rgbTgt.v2 / rgbSrc.v2,
+func min(a, b, c float64) float64 {
+	var m float64
+	if a < b {
+		m = a
+	} else {
+		m = b
 	}
+
+	if c < m {
+		m = c
+	}
+
+	return m
 }
+
+func max(a, b, c float64) float64 {
+	var m float64
+	if a > b {
+		m = a
+	} else {
+		m = b
+	}
+
+	if c > m {
+		m = c
+	}
+
+	return m
+}
+
