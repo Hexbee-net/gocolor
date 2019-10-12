@@ -433,28 +433,79 @@ func XYZtoLAB(x, y, z float64, observer int, illuminant string) (l, a, b float64
 }
 
 // XYZtoXYY converts a color from XYZ coordinates to xyY.
-func XYZtoXYY() {
-	panic("NOT IMPLEMENTED")
+func XYZtoXYY(x, y, z float64) (float64, float64, float64) {
+	var xyyX, xyyY float64
+	if s := x + y + z; s == 0 {
+		xyyX = 0
+		xyyY = 0
+	} else {
+		xyyX = x / s
+		xyyY = y / s
+	}
+	return xyyX, xyyY, y
 }
 
 // XYZtoLUV converts a color from XYZ coordinates to Luv.
-func XYZtoLUV() {
-	panic("NOT IMPLEMENTED")
+func XYZtoLUV(x, y, z float64, observer int, illuminant string) (l, u, v float64) {
+	wp := getWhitePoint(observer, illuminant)
+
+	d := x + (15.0 * y) + (3.0 * z)
+	if d == 0.0 {
+		u = 0.0
+		v = 0.0
+	} else {
+		u = (4.0 * x) / d
+		v = (9.0 * y) / d
+	}
+
+	y = y / wp.v1
+	if y > CieE {
+		y = math.Pow(y, 1/3)
+	} else {
+		y = (7.787 * y) + (16.0 / 116.0)
+	}
+
+	refU := (4.0 * wp.v0) / (wp.v0 + (15.0 * wp.v1) + (3.0 * wp.v2))
+	refV := (9.0 * wp.v1) / (wp.v0 + (15.0 * wp.v1) + (3.0 * wp.v2))
+
+	l = (116.0 * y) - 16.0
+	u = 13.0 * l * (u - refU)
+	v = 13.0 * l * (v - refV)
+
+	return l, u, v
 }
 
 // XYYtoXYZ converts a color from xyZ coordinates to XYZ.
-func XYYtoXYZ() {
-	panic("NOT IMPLEMENTED")
-}
+func XYYtoXYZ(x, y, Y float64) (float64, float64, float64) {
+	if y == 0 {
+		return 0, 0, 0
+	}
 
-// LUVtoXYZ converts a color from Luv coordinates to XYZ.
-func LUVtoXYZ() {
-	panic("NOT IMPLEMENTED")
+	xyzX := (x * Y) / y
+	xyzY := Y
+	xyzZ := ((1.0 - x - y) * xyzY) / y
+
+	return xyzX, xyzY, xyzZ
 }
 
 // XYZtoIPT converts a color from XYZ coordinates to IPT.
-func XYZtoIPT(x, y, z float64) (i, p, t float64) {
-	panic("NOT IMPLEMENTED")
+func XYZtoIPT(x, y, z float64, observer int, illuminant string) (float64, float64, float64) {
+	if observer != Observer2 || illuminant != RefIlluminantD65 {
+		panic("XYZColor for XYZ->IPT conversion needs to be D65 adapted.")
+	}
+	prime := func(v float64) float64 {
+		r := math.Pow(math.Abs(v), 0.43)
+		if math.Signbit(v) {
+			return -r
+		}
+		return r
+	}
+
+	lms := conversionXyzLms.vdot(vector{x, y, z})
+	lmsPrime := lms.mapfunc(prime)
+	ipt := conversionLmsIpt.vdot(lmsPrime)
+
+	return ipt.v0, ipt.v1, ipt.v2
 }
 
 ////////////////////////////////////////
@@ -492,6 +543,11 @@ func LABtoXYZ(l, a, b float64, observer int, illuminant string) (x, y, z float64
 	return x, y, z
 }
 
+// LUVtoXYZ converts a color from Luv coordinates to XYZ.
+func LUVtoXYZ() {
+	panic("NOT IMPLEMENTED")
+}
+
 // LABtoLCHAB converts a color from LAB coordinates to LCHab.
 func LABtoLCHAB() {
 	panic("NOT IMPLEMENTED")
@@ -527,7 +583,7 @@ func SpectralToXYZ(color []float64, observer int, refIlluminant []float64) (x, y
 		stdObserverZ = stdObs10Z
 	)
 
-	if observer == int2 {
+	if observer == Observer2 {
 		stdObserverX = stdObs2X
 		stdObserverY = stdObs2Y
 		stdObserverZ = stdObs2Z

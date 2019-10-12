@@ -18,21 +18,27 @@ type vector struct {
 	v0, v1, v2 float64
 }
 
-func (a vector) vdiv(b vector) vector {
+func (v vector) vdiv(b vector) vector {
 	return vector{
-		a.v0 / b.v0,
-		a.v1 / b.v1,
-		a.v2 / b.v2,
+		v.v0 / b.v0,
+		v.v1 / b.v1,
+		v.v2 / b.v2,
 	}
 }
 
-func (a vector) diag() matrix {
+func (v vector) diag() matrix {
 	return matrix{
-		a.v0, 0, 0,
-		0, a.v1, 0,
-		0, 0, a.v2,
+		v.v0, 0, 0,
+		0, v.v1, 0,
+		0, 0, v.v2,
 	}
 }
+
+func (v vector) mapfunc(f func(v float64) float64) vector {
+	return vector{f(v.v0), f(v.v1), f(v.v2)}
+}
+
+////////////////////////////////////////
 
 type matrix struct {
 	m00, m01, m02 float64
@@ -64,6 +70,8 @@ func (a matrix) mdot(b matrix) matrix {
 	}
 }
 
+////////////////////////////////////////
+
 func min(a, b, c float64) float64 {
 	var m float64
 	if a < b {
@@ -93,4 +101,3 @@ func max(a, b, c float64) float64 {
 
 	return m
 }
-
