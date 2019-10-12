@@ -401,14 +401,7 @@ func CMYtoCMYK(c, m, y float64) (float64, float64, float64, float64) {
 
 // XYZtoLAB converts a color from XYZ coordinates to Lab.
 func XYZtoLAB(x, y, z float64, observer int, illuminant string) (l, a, b float64) {
-	obsWp, ok := observerWhitePoints[observer]
-	if !ok {
-		panic(fmt.Sprintf("unrecognized observer angle: %v", observer))
-	}
-	wp, ok := obsWp[illuminant]
-	if !ok {
-		panic(fmt.Sprintf("unrecognized illuminant: %v", illuminant))
-	}
+	wp := getWhitePoint(observer, illuminant)
 
 	x /= wp.v0
 	y /= wp.v1
@@ -466,9 +459,37 @@ func XYZtoIPT(x, y, z float64) (i, p, t float64) {
 
 ////////////////////////////////////////
 
-// LABtoXYZ converts a color from LAB coordinates to XYZ.
-func LABtoXYZ(l, a, b float64) (x, y, z float64) {
-	panic("NOT IMPLEMENTED")
+// LABtoXYZ converts a color from Lab coordinates to XYZ.
+func LABtoXYZ(l, a, b float64, observer int, illuminant string) (x, y, z float64) {
+	wp := getWhitePoint(observer, illuminant)
+
+	y = (l + 16) / 116
+	x = a/500 + y
+	z = y - b/200
+
+	if px := math.Pow(x, 3); px > CieE {
+		x = px
+	} else {
+		x = (x - 16/116) / 7.787
+	}
+
+	if py := math.Pow(y, 3); py > CieE {
+		y = py
+	} else {
+		y = (y - 16/116) / 7.787
+	}
+
+	if pz := math.Pow(z, 3); pz > CieE {
+		z = pz
+	} else {
+		z = (z - 16/116) / 7.787
+	}
+
+	x *= wp.v0
+	y *= wp.v1
+	z *= wp.v2
+
+	return x, y, z
 }
 
 // LABtoLCHAB converts a color from LAB coordinates to LCHab.
