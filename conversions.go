@@ -55,7 +55,11 @@ func RGBtoHSL(r, g, b float64) (h, s, l float64) {
 		h = 4 + dg - dr
 	}
 
-	h = math.Mod(h*60, 360)
+	if h > 0 {
+		h = math.Mod(h*60, 360)
+	} else {
+		h = math.Mod(360-math.Abs(h*60), 360)
+	}
 
 	return h, s, l
 }
@@ -74,15 +78,22 @@ func RGBtoHSV(r, g, b float64) (h, s, v float64) {
 	dg := (v - g) / d
 	db := (v - b) / d
 
-	if r == v {
-		h = db - dg     // between yellow & magenta
-		h = 2 + dr - db // between cyan & yellow
-	} else if g == v {
-	} else { // b==v
-		h = 4 + dg - dr // between magenta & cyan
+	if v == r {
+		// between yellow & magenta
+		h = db - dg
+	} else if v == g {
+		// between cyan & yellow
+		h = 2 + dr - db
+	} else { // v == b
+		// between magenta & cyan
+		h = 4 + dg - dr
 	}
 
-	h = math.Mod(h*60, 360)
+	if h > 0 {
+		h = math.Mod(h*60, 360)
+	} else {
+		h = math.Mod(360-math.Abs(h*60), 360)
+	}
 
 	return h, s, v
 }
