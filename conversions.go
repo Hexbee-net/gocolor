@@ -663,3 +663,84 @@ func SpectralToXYZ(color []float64, observer int, refIlluminant []float64) (x, y
 
 	return x, y, z
 }
+
+////////////////////////////////////////
+
+// RGBtoCMYK converts a color from RGB coordinates to CMYK.
+func RGBtoCMYK(r, g, b float64) (c, m, y, k float64) {
+	return CMYtoCMYK(RGBtoCMY(r, g, b))
+}
+
+// CMYKtoRGB converts a color from CMYK coordinates to RGB.
+func CMYKtoRGB(c, m, y, k float64) (r, g, b float64) {
+	return CMYtoRGB(CMYKtoCMY(c, m, y, k))
+}
+
+// RGBtoXYY converts a color from RGB coordinates to xyY.
+func RGBtoXYY(r, g, b float64, space string) (float64, float64, float64) {
+	return XYZtoXYY(RGBtoXYZ(r, g, b, space))
+}
+
+// XYYtoRGB converts a color from xyY coordinates to RGB.
+func XYYtoRGB(x, y, Y float64, space string) (r, g, b float64) {
+	xyzX, xyzY, xyzZ := XYYtoXYZ(x, y, Y)
+	return XYZtoRGB(xyzX, xyzY, xyzZ, space)
+}
+
+// RGBtoLAB converts a color from RGB coordinates to Lab.
+func RGBtoLAB(r, g, b float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	x, y, z := RGBtoXYZ(r, g, b, space)
+	return XYZtoLAB(x, y, z, observer, illuminant)
+}
+
+// LABtoRGB converts a color from Lab coordinates to RGB.
+func LABtoRGB(l, a, b float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	x, y, z := LABtoXYZ(l, a, b, observer, illuminant)
+	return XYZtoRGB(x, y, z, space)
+}
+
+// RGBtoLCHAB converts a color from RGB coordinates to LCHab.
+func RGBtoLCHAB(r, g, b float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	return LABtoLCHAB(RGBtoLAB(r, g, b, space, observer, illuminant))
+}
+
+// LCHABtoRGB converts a color from LCHab coordinates to RGB.
+func LCHABtoRGB(l, c, h float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	labL, labA, labB := LCHABtoLAB(l, c, h)
+	return LABtoRGB(labL, labA, labB, space, observer, illuminant)
+}
+
+// RGBtoLUV converts a color from RGB coordinates to Luv.
+func RGBtoLUV(r, g, b float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	x, y, z := RGBtoXYZ(r, g, b, space)
+	return XYZtoLUV(x, y, z, observer, illuminant)
+}
+
+// LUVtoRGB converts a color from Luv coordinates to RGB.
+func LUVtoRGB(l, u, v float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	x, y, z := LUVtoXYZ(l, u, v, observer, illuminant)
+	return XYZtoRGB(x, y, z, space)
+}
+
+// RGBtoLCHUV converts a color from RGB coordinates to LCHuv.
+func RGBtoLCHUV(r, g, b float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	return LUVtoLCHUV(RGBtoLUV(r, g, b, space, observer, illuminant))
+}
+
+// LCHUVtoRGB converts a color from LCHuv coordinates to RGB.
+func LCHUVtoRGB(l, c, h float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	luvL, luvU, luvV := LCHUVtoLUV(l, c, h)
+	return LUVtoRGB(luvL, luvU, luvV, space, observer, illuminant)
+}
+
+// RGBtoIPT converts a color from RGB coordinates to IPT.
+func RGBtoIPT(r, g, b float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	x, y, z := RGBtoXYZ(r, g, b, space)
+	return XYZtoIPT(x, y, z, observer, illuminant)
+}
+
+// IPTtoRGB converts a color from IPT coordinates to RGB.
+func IPTtoRGB(i, p, t float64, space string, observer int, illuminant string) (float64, float64, float64) {
+	x, y, z := IPTtoXYZ(i, p, t)
+	return XYZtoRGB(x, y, z, space)
+}
