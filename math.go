@@ -14,6 +14,8 @@
 
 package gocolor
 
+import "math"
+
 type vector struct {
 	v0, v1, v2 float64
 }
@@ -100,4 +102,16 @@ func max(a, b, c float64) float64 {
 	}
 
 	return m
+}
+
+func radians(v float64) float64 {
+	return v * (math.Pi / 180)
+}
+
+func degrees(v float64) float64 {
+	if v > 0 {
+		return v * (180 / math.Pi)
+	}
+
+	return 360 - math.Abs(v)*(180/math.Pi)
 }

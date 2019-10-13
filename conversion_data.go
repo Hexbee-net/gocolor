@@ -213,6 +213,19 @@ var (
 	}
 )
 
+var (
+	conversionIptLms = matrix{
+		1., 0.0975689, 0.205226,
+		1., -0.113876, 0.133217,
+		1, 0.0326151, -0.676887,
+	}
+	conversionLmsXyz = matrix{
+		1.85024, -1.1383, 0.238435,
+		0.366831, 0.643885, -0.0106734,
+		0, 0, 1.08885,
+	}
+)
+
 const (
 	ChromaBradford   = "bradford"   // Bradford
 	ChromaVonKries   = "vonkries"   // von Kries

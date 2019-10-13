@@ -502,8 +502,7 @@ func XYZtoIPT(x, y, z float64, observer int, illuminant string) (float64, float6
 	}
 
 	lms := conversionXyzLms.vdot(vector{x, y, z})
-	lmsPrime := lms.mapfunc(prime)
-	ipt := conversionLmsIpt.vdot(lmsPrime)
+	ipt := conversionLmsIpt.vdot(lms.mapfunc(prime))
 
 	return ipt.v0, ipt.v1, ipt.v2
 }
@@ -544,35 +543,84 @@ func LABtoXYZ(l, a, b float64, observer int, illuminant string) (x, y, z float64
 }
 
 // LUVtoXYZ converts a color from Luv coordinates to XYZ.
-func LUVtoXYZ() {
-	panic("NOT IMPLEMENTED")
+func LUVtoXYZ(l, u, v float64, observer int, illuminant string) (x, y, z float64) {
+	const cieKE = CieK * CieE
+
+	if l <= 0.0 { // Without light, there is no color.
+		return 0, 0, 0
+	}
+
+	wp := getWhitePoint(observer, illuminant)
+
+	vu := u/(13.0*l) + (4.0*wp.v0)/(wp.v0+15.0*wp.v1+3.0*wp.v2)
+	vv := v/(13.0*l) + (9.0*wp.v1)/(wp.v0+15.0*wp.v1+3.0*wp.v2)
+
+	// Y-coordinate calculations.
+	if l > cieKE {
+		y = math.Pow((l+16.0)/116.0, 3.0)
+	} else {
+		y = l / CieK
+	}
+
+	// X-coordinate calculation.
+	x = y * 9.0 * vu / (4.0 * vv)
+
+	// Z-coordinate calculation.
+	z = y * (12.0 - 3.0*vu - 20.0*vv) / (4.0 * vv)
+
+	return x, y, z
 }
 
 // LABtoLCHAB converts a color from LAB coordinates to LCHab.
-func LABtoLCHAB() {
-	panic("NOT IMPLEMENTED")
+func LABtoLCHAB(l, a, b float64) (float64, float64, float64) {
+	c := math.Sqrt(a*a + b*b)
+	h := degrees(math.Atan2(b, a))
+
+	return l, c, h
 }
 
 // LCHABtoLAB converts a color from LCHab coordinates to LAB.
-func LCHABtoLAB() {
-	panic("NOT IMPLEMENTED")
+func LCHABtoLAB(l, c, h float64) (float64, float64, float64) {
+	h = radians(h)
+	a := math.Cos(h) * c
+	b := math.Sin(h) * c
+
+	return l, a, b
 }
 
 // LUVtoLCHUV converts a color from Luv coordinates to LCHuv.
-func LUVtoLCHUV() {
-	panic("NOT IMPLEMENTED")
+func LUVtoLCHUV(l, u, v float64) (float64, float64, float64) {
+	c := math.Sqrt(u*u + v*v)
+	h := degrees(math.Atan2(v, u))
+
+	return l, c, h
 }
 
 // LCHUVtoLUV converts a color from LCHuv coordinates to Luv.
-func LCHUVtoLUV() {
-	panic("NOT IMPLEMENTED")
+func LCHUVtoLUV(l, c, h float64) (float64, float64, float64) {
+	h = radians(h)
+	u := math.Cos(h) * c
+	v := math.Sin(h) * c
+
+	return l, u, v
 }
 
 ////////////////////////////////////////
 
 // IPTtoXYZ converts a color from IPT coordinates to XYZ.
-func IPTtoXYZ(i, p, t float64) (x, y, z float64) {
-	panic("NOT IMPLEMENTED")
+func IPTtoXYZ(i, p, t float64) (float64, float64, float64) {
+	prime := func(v float64) float64 {
+		r := math.Pow(math.Abs(v), 1/0.43)
+		if math.Signbit(v) {
+			return -r
+		}
+		return r
+	}
+
+	lms := conversionIptLms.vdot(vector{i, p, t})
+	xyz := conversionLmsXyz.vdot(lms.mapfunc(prime))
+
+	return xyz.v0, xyz.v1, xyz.v2
 }
 
 // SpectralToXYZ converts spectral readings to XYZ coordinates.
