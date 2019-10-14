@@ -40,6 +40,57 @@ func TestFromRGB(t *testing.T) {
 }
 
 func TestRGBtoHSL(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0, 0, 0}, to: []float64{0, 0, 0}},
+		{from: []float64{1, 1, 1}, to: []float64{0, 0, 1}},
+		{from: []float64{1, 0, 0}, to: []float64{0, 1, 0.5}},
+		{from: []float64{0, 1, 0}, to: []float64{120, 1, 0.5}},
+		{from: []float64{0, 0, 1}, to: []float64{240, 1, 0.5}},
+		{from: []float64{1, 1, 0}, to: []float64{60, 1, 0.5}},
+		{from: []float64{1, 0, 1}, to: []float64{300, 1, 0.5}},
+		{from: []float64{0, 1, 1}, to: []float64{180, 1, 0.5}},
+		{from: []float64{1, 0.5, 0}, to: []float64{30, 1, 0.5}},
+		{from: []float64{1, 0.5, 0.5}, to: []float64{0, 1, 0.75}},
+		{from: []float64{0.5, 1, 0}, to: []float64{90, 1, 0.5}},
+		{from: []float64{0.5, 1, 0.5}, to: []float64{120, 1, 0.75}},
+		{from: []float64{0.5, 0, 1}, to: []float64{270, 1, 0.5}},
+		{from: []float64{0.5, 0.5, 1}, to: []float64{240, 1, 0.75}},
+		{from: []float64{0.5, 0.5, 0.5}, to: []float64{0, 0, 0.5}},
+		{from: []float64{0.5, 0.5, 0}, to: []float64{60, 1, 0.25}},
+		{from: []float64{0.5, 0, 0.5}, to: []float64{300, 1, 0.25}},
+		{from: []float64{0, 0.5, 0.5}, to: []float64{180, 1, 0.25}},
+		{from: []float64{0.5, 0, 0}, to: []float64{0, 1, 0.25}},
+		{from: []float64{0, 0.5, 0}, to: []float64{120, 1, 0.25}},
+		{from: []float64{0, 0, 0.5}, to: []float64{240, 1, 0.25}},
+		{from: []float64{1, 0.5, 0.25}, to: []float64{20, 1, 0.625}},
+		{from: []float64{0.5, 1, 0.25}, to: []float64{100, 1, 0.625}},
+		{from: []float64{0.5, 0.25, 1}, to: []float64{260, 1, 0.625}},
+		{from: []float64{0.25, 1, 0.5}, to: []float64{140, 1, 0.625}},
+		{from: []float64{0.25, 0.5, 1}, to: []float64{220, 1, 0.625}},
+		{from: []float64{0.75, 0, 0}, to: []float64{0, 1, 0.375}},
+		{from: []float64{0, 0.75, 0}, to: []float64{120, 1, 0.375}},
+		{from: []float64{0, 0, 0.75}, to: []float64{240, 1, 0.375}},
+		{from: []float64{0.75, 0.75, 0}, to: []float64{60, 1, 0.375}},
+		{from: []float64{0.75, 0, 0.75}, to: []float64{300, 1, 0.375}},
+		{from: []float64{0, 0.75, 0.75}, to: []float64{180, 1, 0.375}},
+		{from: []float64{0.75, 0.5, 0}, to: []float64{40, 1, 0.375}},
+		{from: []float64{0.75, 0, 0.5}, to: []float64{320, 1, 0.375}},
+		{from: []float64{0.75, 0.5, 0.5}, to: []float64{0, 1.0 / 3.0, 0.625}},
+		{from: []float64{0.5, 0.75, 0}, to: []float64{80, 1, 0.375}},
+		{from: []float64{0, 0.75, 0.5}, to: []float64{160, 1, 0.375}},
+		{from: []float64{0.5, 0.75, 0.5}, to: []float64{120, 1.0 / 3.0, 0.625}},
+		{from: []float64{0.5, 0, 0.75}, to: []float64{280, 1, 0.375}},
+		{from: []float64{0, 0.5, 0.75}, to: []float64{200, 1, 0.375}},
+		{from: []float64{0.5, 0.5, 0.75}, to: []float64{240, 1.0 / 3.0, 0.625}},
+	}
+
+	for i := 0; i < len(tests); i++ {
+		h, s, l := gocolor.RGBtoHSL(tests[i].from[0], tests[i].from[1], tests[i].from[2])
+
+		assert.InDeltaf(t, tests[i].to[0], h, precision, "h is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[i].to[1], s, precision, "s is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[i].to[2], l, precision, "l is wrong for test #%v", i+1)
+	}
 }
 
 func TestRGBtoHSV(t *testing.T) {
