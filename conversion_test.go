@@ -154,6 +154,57 @@ func TestRGBtoYUV(t *testing.T) {
 }
 
 func TestRGBtoCMY(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0, 0, 0}, to: []float64{1, 1, 1}},
+		{from: []float64{1, 1, 1}, to: []float64{0, 0, 0}},
+		{from: []float64{1, 0, 0}, to: []float64{0, 1, 1}},
+		{from: []float64{0, 1, 0}, to: []float64{1, 0, 1}},
+		{from: []float64{0, 0, 1}, to: []float64{1, 1, 0}},
+		{from: []float64{1, 1, 0}, to: []float64{0, 0, 1}},
+		{from: []float64{1, 0, 1}, to: []float64{0, 1, 0}},
+		{from: []float64{0, 1, 1}, to: []float64{1, 0, 0}},
+		{from: []float64{1, 0.5, 0}, to: []float64{0, 0.5, 1}},
+		{from: []float64{1, 0.5, 0.5}, to: []float64{0, 0.5, 0.5}},
+		{from: []float64{0.5, 1, 0}, to: []float64{0.5, 0, 1}},
+		{from: []float64{0.5, 1, 0.5}, to: []float64{0.5, 0, 0.5}},
+		{from: []float64{0.5, 0, 1}, to: []float64{0.5, 1, 0}},
+		{from: []float64{0.5, 0.5, 1}, to: []float64{0.5, 0.5, 0}},
+		{from: []float64{0.5, 0.5, 0.5}, to: []float64{0.5, 0.5, 0.5}},
+		{from: []float64{0.5, 0.5, 0}, to: []float64{0.5, 0.5, 1}},
+		{from: []float64{0.5, 0, 0.5}, to: []float64{0.5, 1, 0.5}},
+		{from: []float64{0, 0.5, 0.5}, to: []float64{1, 0.5, 0.5}},
+		{from: []float64{0.5, 0, 0}, to: []float64{0.5, 1, 1}},
+		{from: []float64{0, 0.5, 0}, to: []float64{1, 0.5, 1}},
+		{from: []float64{0, 0, 0.5}, to: []float64{1, 1, 0.5}},
+		{from: []float64{1, 0.5, 0.25}, to: []float64{0, 0.5, 0.75}},
+		{from: []float64{0.5, 1, 0.25}, to: []float64{0.5, 0, 0.75}},
+		{from: []float64{0.5, 0.25, 1}, to: []float64{0.5, 0.75, 0}},
+		{from: []float64{0.25, 1, 0.5}, to: []float64{0.75, 0, 0.5}},
+		{from: []float64{0.25, 0.5, 1}, to: []float64{0.75, 0.5, 0}},
+		{from: []float64{0.75, 0, 0}, to: []float64{0.25, 1, 1}},
+		{from: []float64{0, 0.75, 0}, to: []float64{1, 0.25, 1}},
+		{from: []float64{0, 0, 0.75}, to: []float64{1, 1, 0.25}},
+		{from: []float64{0.75, 0.75, 0}, to: []float64{0.25, 0.25, 1}},
+		{from: []float64{0.75, 0, 0.75}, to: []float64{0.25, 1, 0.25}},
+		{from: []float64{0, 0.75, 0.75}, to: []float64{1, 0.25, 0.25}},
+		{from: []float64{0.75, 0.5, 0}, to: []float64{0.25, 0.5, 1}},
+		{from: []float64{0.75, 0, 0.5}, to: []float64{0.25, 1, 0.5}},
+		{from: []float64{0.75, 0.5, 0.5}, to: []float64{0.25, 0.5, 0.5}},
+		{from: []float64{0.5, 0.75, 0}, to: []float64{0.5, 0.25, 1}},
+		{from: []float64{0, 0.75, 0.5}, to: []float64{1, 0.25, 0.5}},
+		{from: []float64{0.5, 0.75, 0.5}, to: []float64{0.5, 0.25, 0.5}},
+		{from: []float64{0.5, 0, 0.75}, to: []float64{0.5, 1, 0.25}},
+		{from: []float64{0, 0.5, 0.75}, to: []float64{1, 0.5, 0.25}},
+		{from: []float64{0.5, 0.5, 0.75}, to: []float64{0.5, 0.5, 0.25}},
+	}
+
+	for i := 0; i < len(tests); i++ {
+		c, m, y := gocolor.RGBtoCMY(tests[i].from[0], tests[i].from[1], tests[i].from[2])
+
+		assert.InDeltaf(t, tests[i].to[0], c, precision, "c is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[i].to[1], m, precision, "m is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[i].to[2], y, precision, "y is wrong for test #%v", i+1)
+	}
 }
 
 func TestRGBtoHTML(t *testing.T) {
