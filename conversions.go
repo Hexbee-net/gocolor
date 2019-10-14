@@ -98,12 +98,10 @@ func RGBtoHSV(r, g, b float64) (h, s, v float64) {
 	return h, s, v
 }
 
-// RGBtoYIQ converts a color from base RGB coordinates to YIQ.
+// RGBtoYIQ converts a color from base RGB coordinates to YIQ (Luma In-phase Quadrature).
 func RGBtoYIQ(r, g, b float64) (y, i, q float64) {
-	y = (r * 0.29895808) + (g * 0.58660979) + (b * 0.11443213)
-	i = (r * 0.59590296) - (g * 0.27405705) - (b * 0.32184591)
-	q = (r * 0.21133576) - (g * 0.52263517) + (b * 0.31129940)
-	return y, i, q
+	yiq := conversionRgbYiq.vdot(vector{r, g, b})
+	return yiq.v0, yiq.v1, yiq.v2
 }
 
 // RGBtoYUV converts a color from base RGB coordinates to YUV.
@@ -254,10 +252,8 @@ func HSVtoRGB(h, s, v float64) (r, g, b float64) {
 
 // YIQtoRGB converts a color from YIQ coordinates to RGB.
 func YIQtoRGB(y, i, q float64) (r, g, b float64) {
-	r = y + (i * 0.9562) + (q * 0.6210)
-	g = y - (i * 0.2717) - (q * 0.6485)
-	b = y - (i * 1.1053) + (q * 1.7020)
-	return r, g, b
+	rgb := conversionYiqRgb.vdot(vector{y, i, q})
+	return rgb.v0, rgb.v1, rgb.v2
 }
 
 // YUVtoRGB converts a color from YUV coordinates to RGB.

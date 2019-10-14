@@ -14,7 +14,9 @@
 
 package gocolor
 
-import "math"
+import (
+	"math"
+)
 
 type vector struct {
 	v0, v1, v2 float64
@@ -50,9 +52,9 @@ type matrix struct {
 
 func (a matrix) vdot(b vector) vector {
 	return vector{
-		a.m00*b.v0 + a.m01*b.v0 + a.m02*b.v0,
-		a.m10*b.v1 + a.m11*b.v1 + a.m12*b.v1,
-		a.m20*b.v2 + a.m21*b.v2 + a.m22*b.v2,
+		a.m00*b.v0 + a.m01*b.v1 + a.m02*b.v2,
+		a.m10*b.v0 + a.m11*b.v1 + a.m12*b.v2,
+		a.m20*b.v0 + a.m21*b.v1 + a.m22*b.v2,
 	}
 }
 

@@ -226,6 +226,19 @@ var (
 	}
 )
 
+var (
+	conversionRgbYiq = matrix{
+		0.29895808, 0.58660979, 0.11443213,
+		0.59590296, -0.27405705, -0.32184591,
+		0.21133576, -0.52263517, 0.31129940,
+	}
+	conversionYiqRgb = matrix{
+		1, 0.9562, 0.621,
+		1, -0.2717, -0.6485,
+		1, -1.1053, 1.702,
+	}
+)
+
 const (
 	ChromaBradford   = "bradford"   // Bradford
 	ChromaVonKries   = "vonkries"   // von Kries
