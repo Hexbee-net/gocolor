@@ -303,6 +303,57 @@ func TestRGBtoCMY(t *testing.T) {
 }
 
 func TestRGBtoHTML(t *testing.T) {
+	tests := []struct {
+		from []float64
+		to   string
+	}{
+		{from: []float64{0.00, 0.00, 0.00}, to: "#000000"},
+		{from: []float64{1.00, 1.00, 1.00}, to: "#FFFFFF"},
+		{from: []float64{1.00, 0.00, 0.00}, to: "#FF0000"},
+		{from: []float64{0.00, 1.00, 0.00}, to: "#00FF00"},
+		{from: []float64{0.00, 0.00, 1.00}, to: "#0000FF"},
+		{from: []float64{1.00, 1.00, 0.00}, to: "#FFFF00"},
+		{from: []float64{1.00, 0.00, 1.00}, to: "#FF00FF"},
+		{from: []float64{0.00, 1.00, 1.00}, to: "#00FFFF"},
+		{from: []float64{1.00, 0.50, 0.00}, to: "#FF8000"},
+		{from: []float64{1.00, 0.50, 0.50}, to: "#FF8080"},
+		{from: []float64{0.50, 1.00, 0.00}, to: "#80FF00"},
+		{from: []float64{0.50, 1.00, 0.50}, to: "#80FF80"},
+		{from: []float64{0.50, 0.00, 1.00}, to: "#8000FF"},
+		{from: []float64{0.50, 0.50, 1.00}, to: "#8080FF"},
+		{from: []float64{0.50, 0.50, 0.50}, to: "#808080"},
+		{from: []float64{0.50, 0.50, 0.00}, to: "#808000"},
+		{from: []float64{0.50, 0.00, 0.50}, to: "#800080"},
+		{from: []float64{0.00, 0.50, 0.50}, to: "#008080"},
+		{from: []float64{0.50, 0.00, 0.00}, to: "#800000"},
+		{from: []float64{0.00, 0.50, 0.00}, to: "#008000"},
+		{from: []float64{0.00, 0.00, 0.50}, to: "#000080"},
+		{from: []float64{1.00, 0.50, 0.25}, to: "#FF8040"},
+		{from: []float64{0.50, 1.00, 0.25}, to: "#80FF40"},
+		{from: []float64{0.50, 0.25, 1.00}, to: "#8040FF"},
+		{from: []float64{0.25, 1.00, 0.50}, to: "#40FF80"},
+		{from: []float64{0.25, 0.50, 1.00}, to: "#4080FF"},
+		{from: []float64{0.75, 0.00, 0.00}, to: "#BF0000"},
+		{from: []float64{0.00, 0.75, 0.00}, to: "#00BF00"},
+		{from: []float64{0.00, 0.00, 0.75}, to: "#0000BF"},
+		{from: []float64{0.75, 0.75, 0.00}, to: "#BFBF00"},
+		{from: []float64{0.75, 0.00, 0.75}, to: "#BF00BF"},
+		{from: []float64{0.00, 0.75, 0.75}, to: "#00BFBF"},
+		{from: []float64{0.75, 0.50, 0.00}, to: "#BF8000"},
+		{from: []float64{0.75, 0.00, 0.50}, to: "#BF0080"},
+		{from: []float64{0.75, 0.50, 0.50}, to: "#BF8080"},
+		{from: []float64{0.50, 0.75, 0.00}, to: "#80BF00"},
+		{from: []float64{0.00, 0.75, 0.50}, to: "#00BF80"},
+		{from: []float64{0.50, 0.75, 0.50}, to: "#80BF80"},
+		{from: []float64{0.50, 0.00, 0.75}, to: "#8000BF"},
+		{from: []float64{0.00, 0.50, 0.75}, to: "#0080BF"},
+		{from: []float64{0.50, 0.50, 0.75}, to: "#8080BF"},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		hex := gocolor.RGBtoHEX(tests[n].from[0], tests[n].from[1], tests[n].from[2])
+		assert.Equal(t, tests[n].to, hex)
+	}
 }
 
 func TestRGBtoXYZ(t *testing.T) {
