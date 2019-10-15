@@ -84,12 +84,12 @@ func TestRGBtoHSL(t *testing.T) {
 		{from: []float64{0.50, 0.50, 0.75}, to: []float64{240.0, 1.0 / 3.0, 0.625}},
 	}
 
-	for i := 0; i < len(tests); i++ {
-		h, s, l := gocolor.RGBtoHSL(tests[i].from[0], tests[i].from[1], tests[i].from[2])
+	for n := 0; n < len(tests); n++ {
+		h, s, l := gocolor.RGBtoHSL(tests[n].from[0], tests[n].from[1], tests[n].from[2])
 
-		assert.InDeltaf(t, tests[i].to[0], h, precision, "h is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[i].to[1], s, precision, "s is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[i].to[2], l, precision, "l is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[n].to[0], h, precision, "h is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], s, precision, "s is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], l, precision, "l is wrong for test #%v", n+1)
 	}
 }
 
@@ -138,12 +138,12 @@ func TestRGBtoHSV(t *testing.T) {
 		{from: []float64{0.50, 0.50, 0.75}, to: []float64{240.0, 1.0 / 3.0, 0.75}},
 	}
 
-	for i := 0; i < len(tests); i++ {
-		h, s, v := gocolor.RGBtoHSV(tests[i].from[0], tests[i].from[1], tests[i].from[2])
+	for n := 0; n < len(tests); n++ {
+		h, s, v := gocolor.RGBtoHSV(tests[n].from[0], tests[n].from[1], tests[n].from[2])
 
-		assert.InDeltaf(t, tests[i].to[0], h, precision, "h is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[i].to[1], s, precision, "s is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[i].to[2], v, precision, "v is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[n].to[0], h, precision, "h is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], s, precision, "s is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], v, precision, "v is wrong for test #%v", n+1)
 	}
 }
 
@@ -195,13 +195,57 @@ func TestRGBtoYIQ(t *testing.T) {
 	for n := 0; n < len(tests); n++ {
 		y, i, q := gocolor.RGBtoYIQ(tests[n].from[0], tests[n].from[1], tests[n].from[2])
 
-		assert.InDeltaf(t, tests[n].to[0], y, precision, "y is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[n].to[1], i, precision, "i is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[n].to[2], q, precision, "q is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[n].to[0], y, precision, "y is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], i, precision, "i is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], q, precision, "q is wrong for test #%v", n+1)
 	}
 }
 
 func TestRGBtoYUV(t *testing.T) {
+	t.Run("convert RGB color to SDTV YUV", TestRGBtoSDYUV)
+	t.Run("convert RGB color to HDTV YUV", TestRGBtoHDYUV)
+}
+
+func TestRGBtoSDYUV(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0.00, 0.00, 0.00}, to: []float64{0.00000000, 00.00000000, 00.00000000}},
+		{from: []float64{1.00, 1.00, 1.00}, to: []float64{1.00000000, 00.00001000, 00.00000000}},
+		{from: []float64{1.00, 0.00, 0.00}, to: []float64{0.29900000, -0.14713000, 00.61500000}},
+		{from: []float64{0.00, 1.00, 0.00}, to: []float64{0.58700000, -0.28886000, -0.51499000}},
+		{from: []float64{0.00, 0.00, 1.00}, to: []float64{0.11400000, 00.43600000, -0.10001000}},
+		{from: []float64{1.00, 1.00, 0.00}, to: []float64{0.88600000, -0.43599000, 00.10001000}},
+		{from: []float64{1.00, 0.00, 1.00}, to: []float64{0.41300000, 00.28887000, 00.51499000}},
+		{from: []float64{0.00, 1.00, 1.00}, to: []float64{0.70100000, 00.14714000, -0.61500000}},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		y, u, v := gocolor.RGBtoSDYUV(tests[n].from[0], tests[n].from[1], tests[n].from[2])
+
+		assert.InDeltaf(t, tests[n].to[0], y, precision, "y is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], u, precision, "u is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], v, precision, "v is wrong for test #%v", n+1)
+	}
+}
+
+func TestRGBtoHDYUV(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0.00, 0.00, 0.00}, to: []float64{0.00000000, 00.00000000, 00.00000000}},
+		{from: []float64{1.00, 1.00, 1.00}, to: []float64{1.00000000, 00.00000000, 00.11278000}},
+		{from: []float64{1.00, 0.00, 0.00}, to: []float64{0.21260000, -0.09991000, 00.61500000}},
+		{from: []float64{0.00, 1.00, 0.00}, to: []float64{0.71520000, -0.33609000, -0.55861000}},
+		{from: []float64{0.00, 0.00, 1.00}, to: []float64{0.07220000, 00.43600000, 00.05639000}},
+		{from: []float64{1.00, 1.00, 0.00}, to: []float64{0.92780000, -0.43600000, 00.05639000}},
+		{from: []float64{1.00, 0.00, 1.00}, to: []float64{0.28480000, 00.33609000, 00.67139000}},
+		{from: []float64{0.00, 1.00, 1.00}, to: []float64{0.78740000, 00.09991000, -0.50222000}},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		y, u, v := gocolor.RGBtoHDYUV(tests[n].from[0], tests[n].from[1], tests[n].from[2])
+
+		assert.InDeltaf(t, tests[n].to[0], y, precision, "y is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], u, precision, "u is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], v, precision, "v is wrong for test #%v", n+1)
+	}
 }
 
 func TestRGBtoCMY(t *testing.T) {
@@ -249,12 +293,12 @@ func TestRGBtoCMY(t *testing.T) {
 		{from: []float64{0.50, 0.50, 0.75}, to: []float64{0.50, 0.50, 0.25}},
 	}
 
-	for i := 0; i < len(tests); i++ {
-		c, m, y := gocolor.RGBtoCMY(tests[i].from[0], tests[i].from[1], tests[i].from[2])
+	for n := 0; n < len(tests); n++ {
+		c, m, y := gocolor.RGBtoCMY(tests[n].from[0], tests[n].from[1], tests[n].from[2])
 
-		assert.InDeltaf(t, tests[i].to[0], c, precision, "c is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[i].to[1], m, precision, "m is wrong for test #%v", i+1)
-		assert.InDeltaf(t, tests[i].to[2], y, precision, "y is wrong for test #%v", i+1)
+		assert.InDeltaf(t, tests[n].to[0], c, precision, "c is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], m, precision, "m is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], y, precision, "y is wrong for test #%v", n+1)
 	}
 }
 

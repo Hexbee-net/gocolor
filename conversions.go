@@ -104,12 +104,16 @@ func RGBtoYIQ(r, g, b float64) (y, i, q float64) {
 	return yiq.v0, yiq.v1, yiq.v2
 }
 
-// RGBtoYUV converts a color from base RGB coordinates to YUV.
-func RGBtoYUV(r, g, b float64) (y, u, v float64) {
-	y = (r * 0.29900) + (g * 0.58700) + (b * 0.11400)
-	u = -(r * 0.14713) - (g * 0.28886) + (b * 0.43600)
-	v = (r * 0.61500) - (g * 0.51499) - (b * 0.10001)
-	return y, u, v
+// RGBtoSDYUV converts a color from base RGB coordinates to SDTV YUV (BT.601).
+func RGBtoSDYUV(r, g, b float64) (y, u, v float64) {
+	yuv := conversionRgbSDYuv.vdot(vector{r, g, b})
+	return yuv.v0, yuv.v1, yuv.v2
+}
+
+// RGBtoHDYUV converts a color from base RGB coordinates to HDTV YUV (BT.709).
+func RGBtoHDYUV(r, g, b float64) (y, u, v float64) {
+	yuv := conversionRgbHDYuv.vdot(vector{r, g, b})
+	return yuv.v0, yuv.v1, yuv.v2
 }
 
 // RGBtoCMY converts a color from base RGB coordinates to CMY.
@@ -117,8 +121,8 @@ func RGBtoCMY(r, g, b float64) (float64, float64, float64) {
 	return 1 - r, 1 - g, 1 - b
 }
 
-// RGBtoHTML converts a color from base RGB coordinates to HTML #RRGGBB.
-func RGBtoHTML(r, g, b float64) string {
+// RGBtoHEX converts a color from base RGB coordinates to #RRGGBB.
+func RGBtoHEX(r, g, b float64) string {
 	ri := int(math.Min(math.Round(r*255), 255))
 	gi := int(math.Min(math.Round(g*255), 255))
 	bi := int(math.Min(math.Round(b*255), 255))
@@ -256,12 +260,16 @@ func YIQtoRGB(y, i, q float64) (r, g, b float64) {
 	return rgb.v0, rgb.v1, rgb.v2
 }
 
-// YUVtoRGB converts a color from YUV coordinates to RGB.
-func YUVtoRGB(y, u, v float64) (r, g, b float64) {
-	r = y + (v * 1.13983)
-	g = y - (u * 0.39465) - (v * 0.58060)
-	b = y + (u * 2.03211)
-	return r, g, b
+// SDYUVtoRGB converts a color from YUV coordinates to RGB.
+func SDYUVtoRGB(y, u, v float64) (r, g, b float64) {
+	rgb := conversionSDYuvRgb.vdot(vector{y, u, v})
+	return rgb.v0, rgb.v1, rgb.v2
+}
+
+// HDYUVtoRGB converts a color from YUV coordinates to RGB.
+func HDYUVtoRGB(y, u, v float64) (r, g, b float64) {
+	rgb := conversionHDYuvRgb.vdot(vector{y, u, v})
+	return rgb.v0, rgb.v1, rgb.v2
 }
 
 // CMYtoRGB converts a color from CMY coordinates to RGB.
@@ -269,8 +277,8 @@ func CMYtoRGB(c, m, y float64) (float64, float64, float64) {
 	return 1 - c, 1 - m, 1 - y
 }
 
-// HTMLtoRGB converts a color from HTML #RRGGBB to RGB coordinates.
-func HTMLtoRGB(html string) (r, g, b float64) {
+// HEXtoRGB converts a color from HTML #RRGGBB to RGB coordinates.
+func HEXtoRGB(html string) (r, g, b float64) {
 	html = strings.TrimSpace(html)
 	if html[0] == '#' {
 		html = html[1:]
