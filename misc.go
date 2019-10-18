@@ -70,18 +70,18 @@ func getAdaptationMatrix(sourceWP, targetWP vector, adaptation string) matrix {
 	return mInv.mdot(mRat).mdot(mAdp)
 }
 
-func getWhitePoint(observer int, illuminant string) vector {
+func getWhitePoint(observer int, illuminant string) (*vector, error) {
 	// Get white-points for the observer
 	obsWp, ok := observerWhitePoints[observer]
 	if !ok {
-		panic(fmt.Sprintf("unrecognized observer angle: %v", observer))
+		return nil, fmt.Errorf("unrecognized observer angle: %v", observer)
 	}
 
 	// Get white-point for illuminant
 	wp, ok := obsWp[illuminant]
 	if !ok {
-		panic(fmt.Sprintf("unrecognized illuminant: %v", illuminant))
+		return nil, fmt.Errorf("unrecognized illuminant: %v", illuminant)
 	}
 
-	return wp
+	return &wp, nil
 }
