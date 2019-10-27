@@ -953,15 +953,69 @@ func TestCMYtoRGB_InvalidParameters(t *testing.T) {
 	}
 }
 
-func TestCMYtoRGB(t *testing.T) {}
+func TestCMYtoRGB(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0.00, 0.00, 0.00}, to: []float64{1.00, 1.00, 1.00}},
+		{from: []float64{1.00, 1.00, 1.00}, to: []float64{0.00, 0.00, 0.00}},
+		{from: []float64{1.00, 0.00, 0.00}, to: []float64{0.00, 1.00, 1.00}},
+		{from: []float64{0.00, 1.00, 0.00}, to: []float64{1.00, 0.00, 1.00}},
+		{from: []float64{0.00, 0.00, 1.00}, to: []float64{1.00, 1.00, 0.00}},
+		{from: []float64{1.00, 1.00, 0.00}, to: []float64{0.00, 0.00, 1.00}},
+		{from: []float64{1.00, 0.00, 1.00}, to: []float64{0.00, 1.00, 0.00}},
+		{from: []float64{0.00, 1.00, 1.00}, to: []float64{1.00, 0.00, 0.00}},
+		{from: []float64{1.00, 0.50, 0.00}, to: []float64{0.00, 0.50, 1.00}},
+		{from: []float64{1.00, 0.50, 0.50}, to: []float64{0.00, 0.50, 0.50}},
+		{from: []float64{0.50, 1.00, 0.00}, to: []float64{0.50, 0.00, 1.00}},
+		{from: []float64{0.50, 1.00, 0.50}, to: []float64{0.50, 0.00, 0.50}},
+		{from: []float64{0.50, 0.00, 1.00}, to: []float64{0.50, 1.00, 0.00}},
+		{from: []float64{0.50, 0.50, 1.00}, to: []float64{0.50, 0.50, 0.00}},
+		{from: []float64{0.50, 0.50, 0.50}, to: []float64{0.50, 0.50, 0.50}},
+		{from: []float64{0.50, 0.50, 0.00}, to: []float64{0.50, 0.50, 1.00}},
+		{from: []float64{0.50, 0.00, 0.50}, to: []float64{0.50, 1.00, 0.50}},
+		{from: []float64{0.00, 0.50, 0.50}, to: []float64{1.00, 0.50, 0.50}},
+		{from: []float64{0.50, 0.00, 0.00}, to: []float64{0.50, 1.00, 1.00}},
+		{from: []float64{0.00, 0.50, 0.00}, to: []float64{1.00, 0.50, 1.00}},
+		{from: []float64{0.00, 0.00, 0.50}, to: []float64{1.00, 1.00, 0.50}},
+		{from: []float64{1.00, 0.50, 0.25}, to: []float64{0.00, 0.50, 0.75}},
+		{from: []float64{0.50, 1.00, 0.25}, to: []float64{0.50, 0.00, 0.75}},
+		{from: []float64{0.50, 0.25, 1.00}, to: []float64{0.50, 0.75, 0.00}},
+		{from: []float64{0.25, 1.00, 0.50}, to: []float64{0.75, 0.00, 0.50}},
+		{from: []float64{0.25, 0.50, 1.00}, to: []float64{0.75, 0.50, 0.00}},
+		{from: []float64{0.75, 0.00, 0.00}, to: []float64{0.25, 1.00, 1.00}},
+		{from: []float64{0.00, 0.75, 0.00}, to: []float64{1.00, 0.25, 1.00}},
+		{from: []float64{0.00, 0.00, 0.75}, to: []float64{1.00, 1.00, 0.25}},
+		{from: []float64{0.75, 0.75, 0.00}, to: []float64{0.25, 0.25, 1.00}},
+		{from: []float64{0.75, 0.00, 0.75}, to: []float64{0.25, 1.00, 0.25}},
+		{from: []float64{0.00, 0.75, 0.75}, to: []float64{1.00, 0.25, 0.25}},
+		{from: []float64{0.75, 0.50, 0.00}, to: []float64{0.25, 0.50, 1.00}},
+		{from: []float64{0.75, 0.00, 0.50}, to: []float64{0.25, 1.00, 0.50}},
+		{from: []float64{0.75, 0.50, 0.50}, to: []float64{0.25, 0.50, 0.50}},
+		{from: []float64{0.50, 0.75, 0.00}, to: []float64{0.50, 0.25, 1.00}},
+		{from: []float64{0.00, 0.75, 0.50}, to: []float64{1.00, 0.25, 0.50}},
+		{from: []float64{0.50, 0.75, 0.50}, to: []float64{0.50, 0.25, 0.50}},
+		{from: []float64{0.50, 0.00, 0.75}, to: []float64{0.50, 1.00, 0.25}},
+		{from: []float64{0.00, 0.50, 0.75}, to: []float64{1.00, 0.50, 0.25}},
+		{from: []float64{0.50, 0.50, 0.75}, to: []float64{0.50, 0.50, 0.25}},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		c, m, y, err := gocolor.CMYtoRGB(tests[n].from[0], tests[n].from[1], tests[n].from[2])
+
+		assert.NoError(t, err)
+		assert.InDeltaf(t, tests[n].to[0], c, precision, "c is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], m, precision, "m is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], y, precision, "y is wrong for test #%v", n+1)
+	}
+}
 
 func TestHEXtoRGB_InvalidParameters(t *testing.T) {
-	tests := []string {
+	tests := []string{
 		"aaaaaaaa",
 		"gggggg",
 		"fg0000",
 		"00fg00",
 		"0000fg",
+		"a000",
 		"g00",
 		"0g0",
 		"00g",
@@ -976,7 +1030,42 @@ func TestHEXtoRGB_InvalidParameters(t *testing.T) {
 	}
 }
 
-func TestHEXtoRGB(t *testing.T) {}
+func TestHEXtoRGB(t *testing.T) {
+	tests := []struct {
+		from string
+		to   []float64
+	}{
+		{"000000", []float64{0.00000000, 0.00000000, 0.00000000}},
+		{"ffffff", []float64{1.00000000, 1.00000000, 1.00000000}},
+		{"ab0000", []float64{0.67058823, 0.00000000, 0.00000000}},
+		{"AB0000", []float64{0.67058823, 0.00000000, 0.00000000}},
+		{"00ab00", []float64{0.00000000, 0.67058823, 0.00000000}},
+		{"00AB00", []float64{0.00000000, 0.67058823, 0.00000000}},
+		{"0000ab", []float64{0.00000000, 0.00000000, 0.67058823}},
+		{"0000AB", []float64{0.00000000, 0.00000000, 0.67058823}},
+
+		{"a00", []float64{0.66666666, 0.00000000, 0.00000000}},
+		{"0a0", []float64{0.00000000, 0.66666666, 0.00000000}},
+		{"00a", []float64{0.00000000, 0.00000000, 0.66666666}},
+
+		{" 123456", []float64{0.07058824, 0.20392157, 0.33725490}},
+		{"123456 ", []float64{0.07058824, 0.20392157, 0.33725490}},
+		{" 123456 ", []float64{0.07058824, 0.20392157, 0.33725490}},
+		{"#123456", []float64{0.07058824, 0.20392157, 0.33725490}},
+
+		{"#123456", []float64{0.07058824, 0.20392157, 0.33725490}},
+
+		// 	TODO: test named colors
+	}
+
+	for n := 0; n < len(tests); n++ {
+		r, g, b, err := gocolor.HEXtoRGB(tests[n].from)
+		assert.NoError(t, err)
+		assert.InDeltaf(t, tests[n].to[0], r, precision, "r is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], g, precision, "g is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], b, precision, "b is wrong for test #%v", n+1)
+	}
+}
 
 func TestXYZtoRGB_InvalidParameters(t *testing.T) {
 	tests := [][]float64{
@@ -1008,3 +1097,164 @@ func TestXYZtoBT2020(t *testing.T) {}
 func TestXYZtoBT202012b(t *testing.T) {}
 
 func TestXYZtoAdobeRGB(t *testing.T) {}
+
+func TestCMYtoCMYK_InvalidParameters(t *testing.T) {
+	tests := [][]float64{
+		{-1, 0, 0},
+		{2, 0, 0},
+		{0, -1, 0},
+		{0, 2, 0},
+		{0, 0, -1},
+		{0, 0, 2},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		_, _, _, _, err := gocolor.CMYtoCMYK(tests[n][0], tests[n][1], tests[n][2])
+		assert.Errorf(t, err, "invalid parameter should return an error for test #%v", n+1)
+	}
+}
+
+func TestCMYtoCMYK(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0.00, 0.00, 0.00}, to: []float64{0.00000000, 0.00000000, 0.00000000, 0.00000000}},
+		{from: []float64{1.00, 1.00, 1.00}, to: []float64{0.00000000, 0.00000000, 0.00000000, 1.00000000}},
+		{from: []float64{1.00, 0.00, 0.00}, to: []float64{1.00000000, 0.00000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.00, 1.00, 0.00}, to: []float64{0.00000000, 1.00000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.00, 0.00, 1.00}, to: []float64{0.00000000, 0.00000000, 1.00000000, 0.00000000}},
+		{from: []float64{1.00, 1.00, 0.00}, to: []float64{1.00000000, 1.00000000, 0.00000000, 0.00000000}},
+		{from: []float64{1.00, 0.00, 1.00}, to: []float64{1.00000000, 0.00000000, 1.00000000, 0.00000000}},
+		{from: []float64{0.00, 1.00, 1.00}, to: []float64{0.00000000, 1.00000000, 1.00000000, 0.00000000}},
+		{from: []float64{1.00, 0.50, 0.00}, to: []float64{1.00000000, 0.50000000, 0.00000000, 0.00000000}},
+		{from: []float64{1.00, 0.50, 0.50}, to: []float64{1.00000000, 0.00000000, 0.00000000, 0.50000000}},
+		{from: []float64{0.50, 1.00, 0.00}, to: []float64{0.50000000, 1.00000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.50, 1.00, 0.50}, to: []float64{0.00000000, 1.00000000, 0.00000000, 0.50000000}},
+		{from: []float64{0.50, 0.00, 1.00}, to: []float64{0.50000000, 0.00000000, 1.00000000, 0.00000000}},
+		{from: []float64{0.50, 0.50, 1.00}, to: []float64{0.00000000, 0.00000000, 1.00000000, 0.50000000}},
+		{from: []float64{0.50, 0.50, 0.50}, to: []float64{0.00000000, 0.00000000, 0.00000000, 0.50000000}},
+		{from: []float64{0.50, 0.50, 0.00}, to: []float64{0.50000000, 0.50000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.50, 0.00, 0.50}, to: []float64{0.50000000, 0.00000000, 0.50000000, 0.00000000}},
+		{from: []float64{0.00, 0.50, 0.50}, to: []float64{0.00000000, 0.50000000, 0.50000000, 0.00000000}},
+		{from: []float64{0.50, 0.00, 0.00}, to: []float64{0.50000000, 0.00000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.00, 0.50, 0.00}, to: []float64{0.00000000, 0.50000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.00, 0.00, 0.50}, to: []float64{0.00000000, 0.00000000, 0.50000000, 0.00000000}},
+		{from: []float64{1.00, 0.50, 0.25}, to: []float64{1.00000000, 0.33333333, 0.00000000, 0.25000000}},
+		{from: []float64{0.50, 1.00, 0.25}, to: []float64{0.33333333, 1.00000000, 0.00000000, 0.25000000}},
+		{from: []float64{0.50, 0.25, 1.00}, to: []float64{0.33333333, 0.00000000, 1.00000000, 0.25000000}},
+		{from: []float64{0.25, 1.00, 0.50}, to: []float64{0.00000000, 1.00000000, 0.33333333, 0.25000000}},
+		{from: []float64{0.25, 0.50, 1.00}, to: []float64{0.00000000, 0.33333333, 1.00000000, 0.25000000}},
+		{from: []float64{0.75, 0.00, 0.00}, to: []float64{0.75000000, 0.00000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.00, 0.75, 0.00}, to: []float64{0.00000000, 0.75000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.00, 0.00, 0.75}, to: []float64{0.00000000, 0.00000000, 0.75000000, 0.00000000}},
+		{from: []float64{0.75, 0.75, 0.00}, to: []float64{0.75000000, 0.75000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.75, 0.00, 0.75}, to: []float64{0.75000000, 0.00000000, 0.75000000, 0.00000000}},
+		{from: []float64{0.00, 0.75, 0.75}, to: []float64{0.00000000, 0.75000000, 0.75000000, 0.00000000}},
+		{from: []float64{0.75, 0.50, 0.00}, to: []float64{0.75000000, 0.50000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.75, 0.00, 0.50}, to: []float64{0.75000000, 0.00000000, 0.50000000, 0.00000000}},
+		{from: []float64{0.75, 0.50, 0.50}, to: []float64{0.50000000, 0.00000000, 0.00000000, 0.50000000}},
+		{from: []float64{0.50, 0.75, 0.00}, to: []float64{0.50000000, 0.75000000, 0.00000000, 0.00000000}},
+		{from: []float64{0.00, 0.75, 0.50}, to: []float64{0.00000000, 0.75000000, 0.50000000, 0.00000000}},
+		{from: []float64{0.50, 0.75, 0.50}, to: []float64{0.00000000, 0.50000000, 0.00000000, 0.50000000}},
+		{from: []float64{0.50, 0.00, 0.75}, to: []float64{0.50000000, 0.00000000, 0.75000000, 0.00000000}},
+		{from: []float64{0.00, 0.50, 0.75}, to: []float64{0.00000000, 0.50000000, 0.75000000, 0.00000000}},
+		{from: []float64{0.50, 0.50, 0.75}, to: []float64{0.00000000, 0.00000000, 0.50000000, 0.50000000}},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		c, m, y, k, err := gocolor.CMYtoCMYK(tests[n].from[0], tests[n].from[1], tests[n].from[2])
+
+		assert.NoError(t, err)
+		assert.InDeltaf(t, tests[n].to[0], c, precision, "c is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], m, precision, "m is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], y, precision, "y is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[3], k, precision, "k is wrong for test #%v", n+1)
+	}
+}
+
+func TestCMYKtoCMY_InvalidParameters(t *testing.T) {
+	tests := [][]float64{
+		{-1, 0, 0, 0},
+		{2, 0, 0, 0},
+		{0, -1, 0, 0},
+		{0, 2, 0, 0},
+		{0, 0, -1, 0},
+		{0, 0, 2, 0},
+		{0, 0, 0, -1},
+		{0, 0, 0, 2},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		_, _, _, err := gocolor.CMYKtoCMY(tests[n][0], tests[n][1], tests[n][2], tests[n][3])
+		assert.Errorf(t, err, "invalid parameter should return an error for test #%v", n+1)
+	}
+}
+
+func TestCMYKtoCMY(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0.00, 0.00, 0.00, 0.00}, to: []float64{0.00, 0.00, 0.00}},
+		{from: []float64{1.00, 0.00, 0.00, 0.00}, to: []float64{1.00, 0.00, 0.00}},
+		{from: []float64{0.00, 1.00, 0.00, 0.00}, to: []float64{0.00, 1.00, 0.00}},
+		{from: []float64{0.00, 0.00, 1.00, 0.00}, to: []float64{0.00, 0.00, 1.00}},
+		{from: []float64{0.00, 0.00, 0.00, 1.00}, to: []float64{1.00, 1.00, 1.00}},
+		{from: []float64{1.00, 1.00, 0.00, 0.00}, to: []float64{1.00, 1.00, 0.00}},
+		{from: []float64{1.00, 0.00, 1.00, 0.00}, to: []float64{1.00, 0.00, 1.00}},
+		{from: []float64{0.00, 1.00, 1.00, 0.00}, to: []float64{0.00, 1.00, 1.00}},
+		{from: []float64{1.00, 0.00, 0.00, 0.50}, to: []float64{1.00, 0.50, 0.50}},
+		{from: []float64{0.00, 1.00, 0.00, 0.50}, to: []float64{0.50, 1.00, 0.50}},
+		{from: []float64{0.00, 0.00, 1.00, 0.50}, to: []float64{0.50, 0.50, 1.00}},
+		{from: []float64{1.00, 0.00, 0.00, 0.25}, to: []float64{1.00, 0.25, 0.25}},
+		{from: []float64{0.00, 1.00, 0.00, 0.25}, to: []float64{0.25, 1.00, 0.25}},
+		{from: []float64{0.00, 0.00, 1.00, 0.25}, to: []float64{0.25, 0.25, 1.00}},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		c, m, y, err := gocolor.CMYKtoCMY(tests[n].from[0], tests[n].from[1], tests[n].from[2], tests[n].from[3])
+
+		assert.NoError(t, err)
+		assert.InDeltaf(t, tests[n].to[0], c, precision, "c is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], m, precision, "m is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], y, precision, "y is wrong for test #%v", n+1)
+	}
+}
+
+func TestXYZtoLAB_InvalidParameters(t *testing.T) {}
+func TestXYZtoLAB(t *testing.T)                   {}
+
+func TestXYZtoXYY_InvalidParameters(t *testing.T) {}
+func TestXYZtoXYY(t *testing.T)                   {}
+
+func TestXYZtoLUV_InvalidParameters(t *testing.T) {}
+func TestXYZtoLUV(t *testing.T)                   {}
+
+func TestXYYtoXYZ_InvalidParameters(t *testing.T) {}
+func TestXYYtoXYZ(t *testing.T)                   {}
+
+func TestXYZtoIPT_InvalidParameters(t *testing.T) {}
+func TestXYZtoIPT(t *testing.T)                   {}
+
+////////////////////////////////////////
+
+func TestLABtoXYZ_InvalidParameters(t *testing.T) {}
+func TestLABtoXYZ(t *testing.T)                   {}
+
+func TestLUVtoXYZ_InvalidParameters(t *testing.T) {}
+func TestLUVtoXYZ(t *testing.T)                   {}
+
+func TestLABtoLCHAB_InvalidParameters(t *testing.T) {}
+func TestLABtoLCHAB(t *testing.T)                   {}
+
+func TestLCHABtoLAB_InvalidParameters(t *testing.T) {}
+func TestLCHABtoLAB(t *testing.T)                   {}
+
+func TestLUVtoLCHUV_InvalidParameters(t *testing.T) {}
+func TestLUVtoLCHUV(t *testing.T)                   {}
+
+func TestLCHUVtoLUV_InvalidParameters(t *testing.T) {}
+func TestLCHUVtoLUV(t *testing.T)                   {}
+
+////////////////////////////////////////
+
+func TestIPTtoXYZ_InvalidParameters(t *testing.T) {}
+func TestIPTtoXYZ(t *testing.T)                   {}
+
+func TestSpectralToXYZ_InvalidParameters(t *testing.T) {}
+func TestSpectralToXYZ(t *testing.T)                   {}
