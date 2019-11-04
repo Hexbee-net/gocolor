@@ -159,6 +159,7 @@ func RGBtoHEX(r, g, b float64) (string, error) {
 }
 
 // RGBtoXYZ converts a color from RGB coordinates to XYZ.
+// The illuminant for the XYZ color is D65 and the observer's angle 2°.
 func RGBtoXYZ(r, g, b float64, space string) (x, y, z float64, err error) {
 	if err := checkRGB(r, g, b); err != nil {
 		return 0, 0, 0, err
@@ -429,6 +430,7 @@ func HEXtoRGB(html string) (r, g, b float64, err error) {
 }
 
 // XYZtoRGB converts a color from XYZ coordinates to RGB.
+// The illuminant for the XYZ color is assumed to be D65 and the observer's angle 2°.
 func XYZtoRGB(x, y, z float64, space string) (r, g, b float64, err error) {
 	if err := checkXYZ(x, y, z); err != nil {
 		return 0, 0, 0, err

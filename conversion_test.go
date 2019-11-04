@@ -1090,7 +1090,37 @@ func TestXYZtoRGB(t *testing.T) {
 	t.Run("convert XYZ to AdobeRGB", TestXYZtoAdobeRGB)
 }
 
-func TestXYZtoSRGB(t *testing.T) {}
+func TestXYZtoSRGB(t *testing.T) {
+	tests := []ConversionTest{
+		{from: []float64{0.00, 0.00, 0.00}, to: []float64{000.00000000, 000.00000000, 000.00000000}},
+		{from: []float64{1.00, 0.00, 0.00}, to: []float64{001.66688805, -12.52291672, 000.26159799}},
+		{from: []float64{0.00, 1.00, 0.00}, to: []float64{-19.85982942, 001.31619909, -02.63601463}},
+		{from: []float64{0.00, 0.00, 1.00}, to: []float64{-06.44102569, 000.22533878, 001.02474762}},
+		{from: []float64{1.00, 1.00, 0.00}, to: []float64{001.26212029, 000.95783315, -01.91710190}},
+		{from: []float64{1.00, 0.00, 1.00}, to: []float64{001.55111068, -11.98601320, 001.04807256}},
+		{from: []float64{0.00, 1.00, 1.00}, to: []float64{-26.30085511, 001.32877401, 000.93246906}},
+		{from: []float64{1.00, 1.00, 1.00}, to: []float64{001.08515703, 000.97692153, 000.95880889}},
+		{from: []float64{1.00, 0.50, 0.00}, to: []float64{001.48320505, -00.40388695, -00.59909459}},
+		{from: []float64{1.00, 0.00, 0.50}, to: []float64{001.61040821, -12.25446496, 000.78834211}},
+		{from: []float64{1.00, 0.50, 0.50}, to: []float64{001.41656542, -00.13543519, 000.72353824}},
+		{from: []float64{0.50, 1.00, 0.00}, to: []float64{000.31916348, 001.15565734, -02.27655826}},
+		{from: []float64{0.00, 1.00, 0.50}, to: []float64{-23.08034226, 001.32250664, 000.60514640}},
+		{from: []float64{0.50, 1.00, 0.50}, to: []float64{-02.14700813, 001.16315780, 000.62815890}},
+		{from: []float64{0.50, 0.00, 1.00}, to: []float64{001.05170974, -05.72455484, 001.03649732}},
+		{from: []float64{0.00, 0.50, 1.00}, to: []float64{-16.37094040, 000.99096139, 000.98004861}},
+		{from: []float64{0.50, 0.50, 1.00}, to: []float64{000.62873855, 000.73200674, 000.99250477}},
+		{from: []float64{0.50, 0.50, 0.50}, to: []float64{000.79915267, 000.71806767, 000.70449852}},
+	}
+
+	for n := 0; n < len(tests); n++ {
+		r, g, b, err := gocolor.XYZtoRGB(tests[n].from[0], tests[n].from[1], tests[n].from[2], gocolor.SRGB)
+
+		assert.NoError(t, err)
+		assert.InDeltaf(t, tests[n].to[0], r, precision, "x is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[1], g, precision, "y is wrong for test #%v", n+1)
+		assert.InDeltaf(t, tests[n].to[2], b, precision, "z is wrong for test #%v", n+1)
+	}
+}
 
 func TestXYZtoBT2020(t *testing.T) {}
 
